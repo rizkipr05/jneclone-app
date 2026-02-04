@@ -31,6 +31,69 @@ Aplikasi pengelolaan pengiriman (React Native Expo) dengan backend API Node.js +
 SOURCE /opt/lampp/htdocs/jneclone-app/server/schema.sql;
 ```
 
+## Setup di Windows
+### 1) Jalankan MySQL
+Jika pakai XAMPP, nyalakan **MySQL** dari XAMPP Control Panel.
+
+### 2) Import Schema
+Buka **Command Prompt** atau **PowerShell**:
+```bash
+mysql -u root -p
+```
+
+Di dalam MySQL:
+```sql
+SOURCE C:/path/ke/jneclone-app/server/schema.sql;
+```
+
+Ganti path sesuai lokasi project di Windows.
+
+### 3) Jalankan Backend
+```bash
+cd C:/path/ke/jneclone-app/server
+npm install
+copy .env.example .env
+```
+
+Edit `.env` (Notepad/VS Code) dan isi password MySQL:
+```
+PORT=4001
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=your_mysql_password
+DB_NAME=jneclone
+JWT_SECRET=supersecret
+```
+
+Lalu:
+```bash
+npm run dev
+```
+
+### 4) Jalankan Frontend (Expo)
+```bash
+cd C:/path/ke/jneclone-app
+npm install
+npm start
+```
+
+### 5) Konfigurasi API URL di Windows
+Edit `src/config/env.js`:
+```js
+import { Platform } from "react-native";
+
+export const ENV = {
+  API_BASE_URL:
+    Platform.OS === "web"
+      ? "http://localhost:4001/api"
+      : "http://10.0.2.2:4001/api"
+};
+```
+
+Catatan:
+- Android emulator memakai `10.0.2.2`
+- Web/iOS simulator memakai `localhost`
+
 ## Menjalankan Backend
 ```bash
 cd /opt/lampp/htdocs/jneclone-app/server
@@ -92,4 +155,3 @@ Catatan:
 ```bash
 mysql -u root -p -e "USE jneclone; UPDATE users SET password_hash='\$2a\$10\$GugFcy5cLyd9f8xFE3uc1.wl1nn35OBXJWvPB4QpyqT2RfLy1.QT.' WHERE username='admin';"
 ```
-
