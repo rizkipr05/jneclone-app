@@ -1,96 +1,98 @@
-import React, { useRef } from "react";
-import { View, Text, StyleSheet, Pressable, ScrollView } from "react-native";
-import PrimaryButton from "../components/PrimaryButton";
+import React, { useEffect, useMemo, useState } from "react";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { listShipments } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { COLORS, SPACING, RADIUS } from "../styles/theme";
 
-export default function HomeScreen({ navigation }) {
-  const { user, signOut } = useAuth();
-  const scrollRef = useRef(null);
-  const activeTab = "home";
+const STATUS_LABELS = ["Dibuat", "Diproses", "Dikirim", "Selesai"];
+
+export default function HomeScreen() {
+  const { token } = useAuth();
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        setLoading(true);
+        const data = await listShipments({ limit: 100 }, token);
+        setItems(data.items || []);
+      } catch (err) {
+        setItems([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
+  }, [token]);
+
+  const chartData = useMemo(() => {
+    const counts = STATUS_LABELS.reduce((acc, status) => {
+      acc[status] = 0;
+      return acc;
+    }, {});
+    items.forEach((item) => {
+      const key = STATUS_LABELS.includes(item.status) ? item.status : "Dibuat";
+      counts[key] = (counts[key] || 0) + 1;
+    });
+    return STATUS_LABELS.map((label) => ({
+      label,
+      value: counts[label] || 0
+    }));
+  }, [items]);
+
+  const maxValue =
+    chartData.reduce((max, item) => Math.max(max, item.value), 0) || 1;
 
   return (
     <View style={styles.container}>
       <ScrollView
-        ref={scrollRef}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={styles.title}>Beranda</Text>
+          <Text style={styles.title}>Grafik Pengiriman</Text>
           <Text style={styles.subtitle}>
-            Halo, {user?.name || "Admin"}
+            {loading ? "Memuat data..." : "Ringkasan status pengiriman"}
           </Text>
         </View>
 
-        <View style={styles.quickSection}>
-          <View style={styles.quickRow}>
-            <Text style={styles.sectionTitle}>Aksi Cepat</Text>
+        <View style={styles.statsRow}>
+          <View style={styles.statCard}>
+            <Text style={styles.statLabel}>Total</Text>
+            <Text style={styles.statValue}>{items.length}</Text>
           </View>
-          <Text style={styles.quickText}>
-            Pilih menu untuk input dan cek riwayat pengiriman.
-          </Text>
-          <View style={styles.heroActions}>
-            <PrimaryButton
-              title="Input Pengiriman"
-              onPress={() => navigation.navigate("ShipmentForm")}
-            />
-            <Pressable
-              onPress={() => navigation.navigate("ShipmentHistory")}
-              style={styles.secondaryButton}
-            >
-              <Text style={styles.secondaryText}>Lihat Riwayat</Text>
-            </Pressable>
+          <View style={styles.statCard}>
+            <Text style={styles.statLabel}>Selesai</Text>
+            <Text style={styles.statValue}>
+              {items.filter((i) => i.status === "Selesai").length}
+            </Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statLabel}>Proses</Text>
+            <Text style={styles.statValue}>
+              {items.filter((i) => i.status !== "Selesai").length}
+            </Text>
           </View>
         </View>
 
-        <Pressable onPress={signOut} style={styles.logout}>
-          <Text style={styles.logoutText}>Keluar</Text>
-        </Pressable>
+        <View style={styles.chartCard}>
+          {chartData.map((item) => (
+            <View key={item.label} style={styles.chartRow}>
+              <Text style={styles.chartLabel}>{item.label}</Text>
+              <View style={styles.chartBarWrap}>
+                <View
+                  style={[
+                    styles.chartBar,
+                    { width: `${(item.value / maxValue) * 100}%` }
+                  ]}
+                />
+              </View>
+              <Text style={styles.chartValue}>{item.value}</Text>
+            </View>
+          ))}
+        </View>
       </ScrollView>
-
-      <View style={styles.navBar}>
-        <Pressable
-          onPress={() => scrollRef.current?.scrollTo({ y: 0, animated: true })}
-          style={[styles.navItem, activeTab === "home" && styles.navItemActive]}
-        >
-          {activeTab === "home" ? <View style={styles.navIndicator} /> : null}
-          <View style={styles.navIcon}>
-            <Text style={styles.navIconText}>H</Text>
-          </View>
-          <Text style={styles.navText}>Home</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => navigation.navigate("ShipmentForm")}
-          style={styles.navItem}
-        >
-          {activeTab === "input" ? <View style={styles.navIndicator} /> : null}
-          <View style={styles.navIcon}>
-            <Text style={styles.navIconText}>I</Text>
-          </View>
-          <Text style={styles.navText}>Input{"\n"}Pengiriman</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => navigation.navigate("ShipmentHistory")}
-          style={styles.navItem}
-        >
-          {activeTab === "riwayat" ? <View style={styles.navIndicator} /> : null}
-          <View style={styles.navIcon}>
-            <Text style={styles.navIconText}>R</Text>
-          </View>
-          <Text style={styles.navText}>Lihat{"\n"}Riwayat</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => navigation.navigate("Profile")}
-          style={styles.navItem}
-        >
-          {activeTab === "profil" ? <View style={styles.navIndicator} /> : null}
-          <View style={styles.navIcon}>
-            <Text style={styles.navIconText}>P</Text>
-          </View>
-          <Text style={styles.navText}>Profil</Text>
-        </Pressable>
-      </View>
     </View>
   );
 }
@@ -108,8 +110,8 @@ const styles = StyleSheet.create({
     marginBottom: SPACING.m
   },
   title: {
-    fontSize: 28,
-    fontWeight: "800",
+    fontSize: 24,
+    fontWeight: "700",
     color: COLORS.text,
     marginTop: 6
   },
@@ -117,100 +119,65 @@ const styles = StyleSheet.create({
     marginTop: 6,
     color: COLORS.muted
   },
-  quickSection: {
-    paddingVertical: SPACING.s
-  },
-  quickRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center"
-  },
-  quickText: {
-    color: COLORS.muted,
-    marginTop: SPACING.s,
-    lineHeight: 20
-  },
-  heroActions: {
-    marginTop: SPACING.m,
-    gap: SPACING.s
-  },
-  secondaryButton: {
-    borderWidth: 1,
-    borderColor: COLORS.primary,
-    paddingVertical: SPACING.m,
+  chartCard: {
+    backgroundColor: COLORS.white,
+    padding: SPACING.l,
     borderRadius: RADIUS.l,
-    alignItems: "center"
+    borderWidth: 1,
+    borderColor: "#EEF1F6"
   },
-  secondaryText: {
-    color: COLORS.primary,
-    fontWeight: "600"
+  statsRow: {
+    flexDirection: "row",
+    gap: SPACING.s,
+    marginBottom: SPACING.m
   },
-  sectionTitle: {
+  statCard: {
+    flex: 1,
+    backgroundColor: COLORS.white,
+    padding: SPACING.m,
+    borderRadius: RADIUS.l,
+    borderWidth: 1,
+    borderColor: "#EEF1F6"
+  },
+  statLabel: {
+    color: COLORS.muted,
+    fontSize: 12,
+    textTransform: "uppercase",
+    letterSpacing: 0.6
+  },
+  statValue: {
+    marginTop: 6,
+    fontSize: 20,
     fontWeight: "700",
     color: COLORS.text
   },
-  logout: {
-    marginTop: SPACING.l,
-    alignItems: "center"
+  chartRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: SPACING.s
   },
-  logoutText: {
-    color: COLORS.danger,
+  chartLabel: {
+    width: 90,
+    color: COLORS.text,
     fontWeight: "600"
   },
-  navBar: {
-    position: "absolute",
-    left: SPACING.l,
-    right: SPACING.l,
-    bottom: SPACING.l,
-    backgroundColor: COLORS.white,
-    borderRadius: 18,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 6,
-    shadowColor: "#0B1220",
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 6
-  },
-  navItem: {
+  chartBarWrap: {
     flex: 1,
-    alignItems: "center",
-    paddingVertical: 6,
-    borderRadius: 14
-  },
-  navItemActive: {
-    backgroundColor: "#F0F6FF"
-  },
-  navIndicator: {
-    position: "absolute",
-    top: 4,
-    width: 20,
-    height: 3,
+    height: 10,
+    backgroundColor: "#EEF1F6",
     borderRadius: 999,
-    backgroundColor: "#0E9F4B"
+    overflow: "hidden",
+    marginHorizontal: SPACING.s
   },
-  navIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "#E9F7EF",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 4
+  chartBar: {
+    height: 10,
+    backgroundColor: "#0E9F4B",
+    borderRadius: 999
   },
-  navIconText: {
-    color: "#0E9F4B",
-    fontWeight: "700",
-    fontSize: 12
-  },
-  navText: {
-    fontSize: 10,
-    color: COLORS.text,
-    fontWeight: "600",
-    textAlign: "center",
-    lineHeight: 12
+  chartValue: {
+    width: 24,
+    textAlign: "right",
+    color: COLORS.muted,
+    fontWeight: "600"
   }
 });

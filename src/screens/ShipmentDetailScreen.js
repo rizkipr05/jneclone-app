@@ -5,7 +5,8 @@ import {
   StyleSheet,
   ScrollView,
   Pressable,
-  Alert
+  Alert,
+  Image
 } from "react-native";
 import * as Print from "expo-print";
 import * as Sharing from "expo-sharing";
@@ -16,13 +17,12 @@ import { COLORS, SPACING, RADIUS } from "../styles/theme";
 
 const STATUS_OPTIONS = ["Dibuat", "Diproses", "Dikirim", "Selesai"];
 
-export default function ShipmentDetailScreen({ route, navigation }) {
+export default function ShipmentDetailScreen({ route }) {
   const { id } = route.params;
   const { token } = useAuth();
   const [shipment, setShipment] = useState(null);
   const [loading, setLoading] = useState(false);
   const [updating, setUpdating] = useState(false);
-  const activeTab = null;
 
   const load = async () => {
     try {
@@ -116,6 +116,16 @@ export default function ShipmentDetailScreen({ route, navigation }) {
         <Text style={styles.resiStatus}>{shipment.status}</Text>
       </View>
 
+      {shipment.image_base64 ? (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Foto Pengiriman</Text>
+          <Image
+            source={{ uri: `data:image/jpeg;base64,${shipment.image_base64}` }}
+            style={styles.photo}
+          />
+        </View>
+      ) : null}
+
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Pengirim</Text>
         <Text style={styles.field}>{shipment.sender_name}</Text>
@@ -170,49 +180,6 @@ export default function ShipmentDetailScreen({ route, navigation }) {
 
         <PrimaryButton title="Cetak / Unduh Resi" onPress={onPrint} />
       </ScrollView>
-
-      <View style={styles.navBar}>
-        <Pressable
-          onPress={() => navigation.navigate("Home")}
-          style={styles.navItem}
-        >
-          {activeTab === "home" ? <View style={styles.navIndicator} /> : null}
-          <View style={styles.navIcon}>
-            <Text style={styles.navIconText}>H</Text>
-          </View>
-          <Text style={styles.navText}>Home</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => navigation.navigate("ShipmentForm")}
-          style={styles.navItem}
-        >
-          {activeTab === "input" ? <View style={styles.navIndicator} /> : null}
-          <View style={styles.navIcon}>
-            <Text style={styles.navIconText}>I</Text>
-          </View>
-          <Text style={styles.navText}>Input{"\n"}Pengiriman</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => navigation.navigate("ShipmentHistory")}
-          style={styles.navItem}
-        >
-          {activeTab === "riwayat" ? <View style={styles.navIndicator} /> : null}
-          <View style={styles.navIcon}>
-            <Text style={styles.navIconText}>R</Text>
-          </View>
-          <Text style={styles.navText}>Lihat{"\n"}Riwayat</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => navigation.navigate("Profile")}
-          style={styles.navItem}
-        >
-          {activeTab === "profil" ? <View style={styles.navIndicator} /> : null}
-          <View style={styles.navIcon}>
-            <Text style={styles.navIconText}>P</Text>
-          </View>
-          <Text style={styles.navText}>Profil</Text>
-        </Pressable>
-      </View>
     </View>
   );
 }
@@ -251,6 +218,12 @@ const styles = StyleSheet.create({
     marginTop: 8,
     color: COLORS.primary,
     fontWeight: "600"
+  },
+  photo: {
+    width: "100%",
+    height: 220,
+    borderRadius: RADIUS.m,
+    backgroundColor: "#EEF1F6"
   },
   section: {
     marginBottom: SPACING.m
@@ -294,58 +267,5 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     color: COLORS.muted
-  },
-  navBar: {
-    position: "absolute",
-    left: SPACING.l,
-    right: SPACING.l,
-    bottom: SPACING.l,
-    backgroundColor: COLORS.white,
-    borderRadius: 18,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 6,
-    shadowColor: "#0B1220",
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 6
-  },
-  navItem: {
-    flex: 1,
-    alignItems: "center",
-    paddingVertical: 6,
-    borderRadius: 14
-  },
-  navIndicator: {
-    position: "absolute",
-    top: 4,
-    width: 20,
-    height: 3,
-    borderRadius: 999,
-    backgroundColor: "#0E9F4B"
-  },
-  navIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "#E9F7EF",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 4
-  },
-  navIconText: {
-    color: "#0E9F4B",
-    fontWeight: "700",
-    fontSize: 12
-  },
-  navText: {
-    fontSize: 10,
-    color: COLORS.text,
-    fontWeight: "600",
-    textAlign: "center",
-    lineHeight: 12
   }
 });

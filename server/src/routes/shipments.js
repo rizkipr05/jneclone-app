@@ -46,8 +46,8 @@ router.post("/", async (req, res) => {
     const [result] = await pool.query(
       `INSERT INTO shipments
       (sender_name, sender_phone, sender_address, receiver_name, receiver_phone, receiver_address,
-       origin, destination, weight_kg, content, service, notes, status, created_by)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       origin, destination, weight_kg, content, service, notes, image_base64, status, created_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         body.sender_name,
         body.sender_phone,
@@ -61,6 +61,7 @@ router.post("/", async (req, res) => {
         body.content,
         body.service || "REG",
         body.notes || null,
+        body.image_base64 || null,
         "Dibuat",
         req.user.id
       ]

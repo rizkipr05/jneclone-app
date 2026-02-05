@@ -6,8 +6,10 @@ import {
   StyleSheet,
   ScrollView,
   Alert,
+  Image,
   Pressable
 } from "react-native";
+import * as ImagePicker from "expo-image-picker";
 import PrimaryButton from "../components/PrimaryButton";
 import { createShipment } from "../services/api";
 import { useAuth } from "../context/AuthContext";
@@ -28,12 +30,12 @@ const initialState = {
   notes: ""
 };
 
-export default function ShipmentFormScreen({ navigation }) {
+export default function ShipmentFormScreen() {
   const { token } = useAuth();
   const [form, setForm] = useState(initialState);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const activeTab = "input";
+  const [imageBase64, setImageBase64] = useState("");
 
   const onChange = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -76,11 +78,13 @@ export default function ShipmentFormScreen({ navigation }) {
       setLoading(true);
       const payload = {
         ...form,
-        weight_kg: Number(form.weight_kg)
+        weight_kg: Number(form.weight_kg),
+        image_base64: imageBase64 || null
       };
       const data = await createShipment(payload, token);
       Alert.alert("Berhasil", "Data pengiriman tersimpan.");
       setForm(initialState);
+      setImageBase64("");
       navigation.navigate("ShipmentDetail", { id: data.shipment.id });
     } catch (err) {
       setError(err.message || "Gagal menyimpan data.");
@@ -99,6 +103,32 @@ export default function ShipmentFormScreen({ navigation }) {
         showsVerticalScrollIndicator={false}
       >
         <Text style={styles.title}>Input Data Pengiriman</Text>
+
+        <Text style={styles.sectionTitle}>Foto Pengiriman</Text>
+        <Pressable
+          onPress={async () => {
+            const result = await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ImagePicker.MediaTypeOptions.Images,
+              allowsEditing: true,
+              quality: 0.7,
+              base64: true
+            });
+            if (!result.canceled) {
+              setImageBase64(result.assets[0]?.base64 || "");
+            }
+          }}
+          style={styles.imagePicker}
+        >
+          <Text style={styles.imagePickerText}>
+            {imageBase64 ? "Ganti Foto" : "Pilih Foto"}
+          </Text>
+        </Pressable>
+        {imageBase64 ? (
+          <Image
+            source={{ uri: `data:image/jpeg;base64,${imageBase64}` }}
+            style={styles.imagePreview}
+          />
+        ) : null}
 
       <Text style={styles.sectionTitle}>Pengirim</Text>
       <TextInput
@@ -191,49 +221,6 @@ export default function ShipmentFormScreen({ navigation }) {
         />
         {error ? <Text style={styles.errorText}>{error}</Text> : null}
       </ScrollView>
-
-      <View style={styles.navBar}>
-        <Pressable
-          onPress={() => navigation.navigate("Home")}
-          style={styles.navItem}
-        >
-          {activeTab === "home" ? <View style={styles.navIndicator} /> : null}
-          <View style={styles.navIcon}>
-            <Text style={styles.navIconText}>H</Text>
-          </View>
-          <Text style={styles.navText}>Home</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => navigation.navigate("ShipmentForm")}
-          style={[styles.navItem, activeTab === "input" && styles.navItemActive]}
-        >
-          {activeTab === "input" ? <View style={styles.navIndicator} /> : null}
-          <View style={styles.navIcon}>
-            <Text style={styles.navIconText}>I</Text>
-          </View>
-          <Text style={styles.navText}>Input{"\n"}Pengiriman</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => navigation.navigate("ShipmentHistory")}
-          style={styles.navItem}
-        >
-          {activeTab === "riwayat" ? <View style={styles.navIndicator} /> : null}
-          <View style={styles.navIcon}>
-            <Text style={styles.navIconText}>R</Text>
-          </View>
-          <Text style={styles.navText}>Lihat{"\n"}Riwayat</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => navigation.navigate("Profile")}
-          style={styles.navItem}
-        >
-          {activeTab === "profil" ? <View style={styles.navIndicator} /> : null}
-          <View style={styles.navIcon}>
-            <Text style={styles.navIconText}>P</Text>
-          </View>
-          <Text style={styles.navText}>Profil</Text>
-        </Pressable>
-      </View>
     </View>
   );
 }
@@ -276,60 +263,24 @@ const styles = StyleSheet.create({
     color: COLORS.danger,
     marginTop: SPACING.s
   },
-  navBar: {
-    position: "absolute",
-    left: SPACING.l,
-    right: SPACING.l,
-    bottom: SPACING.l,
-    backgroundColor: COLORS.white,
-    borderRadius: 18,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    gap: 6,
-    shadowColor: "#0B1220",
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 6
-  },
-  navItem: {
-    flex: 1,
+  imagePicker: {
+    borderWidth: 1,
+    borderColor: "#D7DBE3",
+    borderRadius: RADIUS.m,
+    paddingVertical: 12,
     alignItems: "center",
-    paddingVertical: 6,
-    borderRadius: 14
+    backgroundColor: "#F9FAFB",
+    marginBottom: SPACING.s
   },
-  navItemActive: {
-    backgroundColor: "#F0F6FF"
-  },
-  navIndicator: {
-    position: "absolute",
-    top: 4,
-    width: 20,
-    height: 3,
-    borderRadius: 999,
-    backgroundColor: "#0E9F4B"
-  },
-  navIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "#E9F7EF",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 4
-  },
-  navIconText: {
-    color: "#0E9F4B",
-    fontWeight: "700",
-    fontSize: 12
-  },
-  navText: {
-    fontSize: 10,
+  imagePickerText: {
     color: COLORS.text,
-    fontWeight: "600",
-    textAlign: "center",
-    lineHeight: 12
+    fontWeight: "600"
+  },
+  imagePreview: {
+    width: "100%",
+    height: 180,
+    borderRadius: RADIUS.m,
+    marginBottom: SPACING.m,
+    backgroundColor: "#EEF1F6"
   }
 });

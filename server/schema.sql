@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS shipments (
   content VARCHAR(200) NOT NULL,
   service VARCHAR(20) NOT NULL DEFAULT 'REG',
   notes TEXT,
+  image_base64 MEDIUMTEXT,
   status VARCHAR(20) NOT NULL DEFAULT 'Dibuat',
   created_by INT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
