@@ -1,58 +1,43 @@
-import React, { useRef } from "react";
-import { View, Text, StyleSheet, Pressable, ScrollView } from "react-native";
-import PrimaryButton from "../components/PrimaryButton";
+import React from "react";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import { COLORS, SPACING, RADIUS } from "../styles/theme";
 
-export default function HomeScreen({ navigation }) {
+export default function ProfileScreen({ navigation }) {
   const { user, signOut } = useAuth();
-  const scrollRef = useRef(null);
-  const activeTab = "home";
+  const name = user?.name || "Administrator";
+  const role = user?.role || "Administrator";
+  const initial = name.trim().charAt(0).toUpperCase() || "A";
+  const activeTab = "profil";
 
   return (
     <View style={styles.container}>
-      <ScrollView
-        ref={scrollRef}
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.header}>
-          <Text style={styles.title}>Beranda</Text>
-          <Text style={styles.subtitle}>
-            Halo, {user?.name || "Admin"}
-          </Text>
+      <View style={styles.header}>
+        <View style={styles.avatar}>
+          <Text style={styles.avatarText}>{initial}</Text>
         </View>
-
-        <View style={styles.quickSection}>
-          <View style={styles.quickRow}>
-            <Text style={styles.sectionTitle}>Aksi Cepat</Text>
-          </View>
-          <Text style={styles.quickText}>
-            Pilih menu untuk input dan cek riwayat pengiriman.
-          </Text>
-          <View style={styles.heroActions}>
-            <PrimaryButton
-              title="Input Pengiriman"
-              onPress={() => navigation.navigate("ShipmentForm")}
-            />
-            <Pressable
-              onPress={() => navigation.navigate("ShipmentHistory")}
-              style={styles.secondaryButton}
-            >
-              <Text style={styles.secondaryText}>Lihat Riwayat</Text>
-            </Pressable>
-          </View>
+        <View style={styles.meta}>
+          <Text style={styles.name}>{name}</Text>
+          <Text style={styles.role}>{role}</Text>
         </View>
+      </View>
 
-        <Pressable onPress={signOut} style={styles.logout}>
-          <Text style={styles.logoutText}>Keluar</Text>
-        </Pressable>
-      </ScrollView>
+      <View style={styles.card}>
+        <Text style={styles.label}>Email</Text>
+        <Text style={styles.value}>{user?.email || "-"}</Text>
+
+        <Text style={styles.label}>No. Telepon</Text>
+        <Text style={styles.value}>{user?.phone || "-"}</Text>
+      </View>
+
+      <Pressable onPress={signOut} style={styles.logout}>
+        <Text style={styles.logoutText}>Keluar</Text>
+      </Pressable>
 
       <View style={styles.navBar}>
         <Pressable
-          onPress={() => scrollRef.current?.scrollTo({ y: 0, animated: true })}
-          style={[styles.navItem, activeTab === "home" && styles.navItemActive]}
+          onPress={() => navigation.navigate("Home")}
+          style={styles.navItem}
         >
           {activeTab === "home" ? <View style={styles.navIndicator} /> : null}
           <View style={styles.navIcon}>
@@ -82,7 +67,7 @@ export default function HomeScreen({ navigation }) {
         </Pressable>
         <Pressable
           onPress={() => navigation.navigate("Profile")}
-          style={styles.navItem}
+          style={[styles.navItem, activeTab === "profil" && styles.navItemActive]}
         >
           {activeTab === "profil" ? <View style={styles.navIndicator} /> : null}
           <View style={styles.navIcon}>
@@ -98,56 +83,58 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.bg
-  },
-  content: {
+    backgroundColor: COLORS.bg,
     padding: SPACING.l,
-    paddingBottom: 120
+    paddingBottom: 140
   },
   header: {
-    marginBottom: SPACING.m
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: "800",
-    color: COLORS.text,
-    marginTop: 6
-  },
-  subtitle: {
-    marginTop: 6,
-    color: COLORS.muted
-  },
-  quickSection: {
-    paddingVertical: SPACING.s
-  },
-  quickRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center"
+    alignItems: "center",
+    marginBottom: SPACING.l
   },
-  quickText: {
-    color: COLORS.muted,
-    marginTop: SPACING.s,
-    lineHeight: 20
+  avatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: "#0E9F4B",
+    alignItems: "center",
+    justifyContent: "center"
   },
-  heroActions: {
-    marginTop: SPACING.m,
-    gap: SPACING.s
+  avatarText: {
+    color: "#F8FFF8",
+    fontSize: 24,
+    fontWeight: "700"
   },
-  secondaryButton: {
-    borderWidth: 1,
-    borderColor: COLORS.primary,
-    paddingVertical: SPACING.m,
-    borderRadius: RADIUS.l,
-    alignItems: "center"
+  meta: {
+    marginLeft: SPACING.m
   },
-  secondaryText: {
-    color: COLORS.primary,
-    fontWeight: "600"
-  },
-  sectionTitle: {
+  name: {
+    fontSize: 20,
     fontWeight: "700",
     color: COLORS.text
+  },
+  role: {
+    color: COLORS.muted,
+    marginTop: 4
+  },
+  card: {
+    backgroundColor: COLORS.white,
+    padding: SPACING.l,
+    borderRadius: RADIUS.l,
+    borderWidth: 1,
+    borderColor: "#EEF1F6"
+  },
+  label: {
+    color: COLORS.muted,
+    fontSize: 12,
+    marginTop: SPACING.s,
+    textTransform: "uppercase",
+    letterSpacing: 0.8
+  },
+  value: {
+    color: COLORS.text,
+    fontWeight: "600",
+    marginTop: 6
   },
   logout: {
     marginTop: SPACING.l,

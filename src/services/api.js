@@ -1,5 +1,7 @@
 import { ENV } from "../config/env";
 
+const REQUEST_TIMEOUT_MS = 10000;
+
 async function request(path, { method = "GET", body, token } = {}) {
   const headers = {
     Accept: "application/json",
@@ -8,11 +10,25 @@ async function request(path, { method = "GET", body, token } = {}) {
 
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const res = await fetch(`${ENV.API_BASE_URL}${path}`, {
-    method,
-    headers,
-    body: body ? JSON.stringify(body) : undefined
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  let res;
+  try {
+    res = await fetch(`${ENV.API_BASE_URL}${path}`, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+      signal: controller.signal
+    });
+  } catch (err) {
+    if (err?.name === "AbortError") {
+      throw new Error("Koneksi timeout. Periksa API dan jaringan.");
+    }
+    throw new Error("Koneksi gagal. Periksa API dan jaringan.");
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   let data = null;
   try {

@@ -17,6 +17,7 @@ export default function ShipmentHistoryScreen({ navigation }) {
   const [items, setItems] = useState([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
+  const activeTab = "riwayat";
 
   const load = async (keyword = "") => {
     try {
@@ -63,6 +64,7 @@ export default function ShipmentHistoryScreen({ navigation }) {
       <FlatList
         data={items}
         keyExtractor={(item) => String(item.id)}
+        contentContainerStyle={styles.listContent}
         ListEmptyComponent={
           <Text style={styles.emptyText}>
             {loading ? "Memuat..." : "Data belum tersedia."}
@@ -88,6 +90,52 @@ export default function ShipmentHistoryScreen({ navigation }) {
           </Pressable>
         )}
       />
+
+      <View style={styles.navBar}>
+        <Pressable
+          onPress={() => navigation.navigate("Home")}
+          style={styles.navItem}
+        >
+          {activeTab === "home" ? <View style={styles.navIndicator} /> : null}
+          <View style={styles.navIcon}>
+            <Text style={styles.navIconText}>H</Text>
+          </View>
+          <Text style={styles.navText}>Home</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => navigation.navigate("ShipmentForm")}
+          style={styles.navItem}
+        >
+          {activeTab === "input" ? <View style={styles.navIndicator} /> : null}
+          <View style={styles.navIcon}>
+            <Text style={styles.navIconText}>I</Text>
+          </View>
+          <Text style={styles.navText}>Input{"\n"}Pengiriman</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => navigation.navigate("ShipmentHistory")}
+          style={[
+            styles.navItem,
+            activeTab === "riwayat" && styles.navItemActive
+          ]}
+        >
+          {activeTab === "riwayat" ? <View style={styles.navIndicator} /> : null}
+          <View style={styles.navIcon}>
+            <Text style={styles.navIconText}>R</Text>
+          </View>
+          <Text style={styles.navText}>Lihat{"\n"}Riwayat</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => navigation.navigate("Profile")}
+          style={styles.navItem}
+        >
+          {activeTab === "profil" ? <View style={styles.navIndicator} /> : null}
+          <View style={styles.navIcon}>
+            <Text style={styles.navIconText}>P</Text>
+          </View>
+          <Text style={styles.navText}>Profil</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -108,6 +156,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: SPACING.s,
     marginBottom: SPACING.m
+  },
+  listContent: {
+    paddingBottom: 140
   },
   searchInput: {
     flex: 1,
@@ -155,5 +206,61 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     color: COLORS.muted
+  },
+  navBar: {
+    position: "absolute",
+    left: SPACING.l,
+    right: SPACING.l,
+    bottom: SPACING.l,
+    backgroundColor: COLORS.white,
+    borderRadius: 18,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 6,
+    shadowColor: "#0B1220",
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 6
+  },
+  navItem: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 6,
+    borderRadius: 14
+  },
+  navItemActive: {
+    backgroundColor: "#F0F6FF"
+  },
+  navIndicator: {
+    position: "absolute",
+    top: 4,
+    width: 20,
+    height: 3,
+    borderRadius: 999,
+    backgroundColor: "#0E9F4B"
+  },
+  navIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#E9F7EF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4
+  },
+  navIconText: {
+    color: "#0E9F4B",
+    fontWeight: "700",
+    fontSize: 12
+  },
+  navText: {
+    fontSize: 10,
+    color: COLORS.text,
+    fontWeight: "600",
+    textAlign: "center",
+    lineHeight: 12
   }
 });

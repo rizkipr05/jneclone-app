@@ -16,12 +16,13 @@ import { COLORS, SPACING, RADIUS } from "../styles/theme";
 
 const STATUS_OPTIONS = ["Dibuat", "Diproses", "Dikirim", "Selesai"];
 
-export default function ShipmentDetailScreen({ route }) {
+export default function ShipmentDetailScreen({ route, navigation }) {
   const { id } = route.params;
   const { token } = useAuth();
   const [shipment, setShipment] = useState(null);
   const [loading, setLoading] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const activeTab = null;
 
   const load = async () => {
     try {
@@ -103,8 +104,12 @@ export default function ShipmentDetailScreen({ route }) {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Text style={styles.title}>Detail Pengiriman</Text>
+    <View style={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={styles.title}>Detail Pengiriman</Text>
       <View style={styles.resiBox}>
         <Text style={styles.resiLabel}>No Resi</Text>
         <Text style={styles.resiValue}>{shipment.resi_number}</Text>
@@ -163,8 +168,52 @@ export default function ShipmentDetailScreen({ route }) {
         </View>
       </View>
 
-      <PrimaryButton title="Cetak / Unduh Resi" onPress={onPrint} />
-    </ScrollView>
+        <PrimaryButton title="Cetak / Unduh Resi" onPress={onPrint} />
+      </ScrollView>
+
+      <View style={styles.navBar}>
+        <Pressable
+          onPress={() => navigation.navigate("Home")}
+          style={styles.navItem}
+        >
+          {activeTab === "home" ? <View style={styles.navIndicator} /> : null}
+          <View style={styles.navIcon}>
+            <Text style={styles.navIconText}>H</Text>
+          </View>
+          <Text style={styles.navText}>Home</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => navigation.navigate("ShipmentForm")}
+          style={styles.navItem}
+        >
+          {activeTab === "input" ? <View style={styles.navIndicator} /> : null}
+          <View style={styles.navIcon}>
+            <Text style={styles.navIconText}>I</Text>
+          </View>
+          <Text style={styles.navText}>Input{"\n"}Pengiriman</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => navigation.navigate("ShipmentHistory")}
+          style={styles.navItem}
+        >
+          {activeTab === "riwayat" ? <View style={styles.navIndicator} /> : null}
+          <View style={styles.navIcon}>
+            <Text style={styles.navIconText}>R</Text>
+          </View>
+          <Text style={styles.navText}>Lihat{"\n"}Riwayat</Text>
+        </Pressable>
+        <Pressable
+          onPress={() => navigation.navigate("Profile")}
+          style={styles.navItem}
+        >
+          {activeTab === "profil" ? <View style={styles.navIndicator} /> : null}
+          <View style={styles.navIcon}>
+            <Text style={styles.navIconText}>P</Text>
+          </View>
+          <Text style={styles.navText}>Profil</Text>
+        </Pressable>
+      </View>
+    </View>
   );
 }
 
@@ -174,7 +223,8 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.bg
   },
   content: {
-    padding: SPACING.l
+    padding: SPACING.l,
+    paddingBottom: 140
   },
   title: {
     fontSize: 24,
@@ -244,5 +294,58 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     color: COLORS.muted
+  },
+  navBar: {
+    position: "absolute",
+    left: SPACING.l,
+    right: SPACING.l,
+    bottom: SPACING.l,
+    backgroundColor: COLORS.white,
+    borderRadius: 18,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    gap: 6,
+    shadowColor: "#0B1220",
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 6
+  },
+  navItem: {
+    flex: 1,
+    alignItems: "center",
+    paddingVertical: 6,
+    borderRadius: 14
+  },
+  navIndicator: {
+    position: "absolute",
+    top: 4,
+    width: 20,
+    height: 3,
+    borderRadius: 999,
+    backgroundColor: "#0E9F4B"
+  },
+  navIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#E9F7EF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4
+  },
+  navIconText: {
+    color: "#0E9F4B",
+    fontWeight: "700",
+    fontSize: 12
+  },
+  navText: {
+    fontSize: 10,
+    color: COLORS.text,
+    fontWeight: "600",
+    textAlign: "center",
+    lineHeight: 12
   }
 });

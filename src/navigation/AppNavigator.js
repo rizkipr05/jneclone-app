@@ -5,6 +5,7 @@ import HomeScreen from "../screens/HomeScreen";
 import ShipmentFormScreen from "../screens/ShipmentFormScreen";
 import ShipmentHistoryScreen from "../screens/ShipmentHistoryScreen";
 import ShipmentDetailScreen from "../screens/ShipmentDetailScreen";
+import ProfileScreen from "../screens/ProfileScreen";
 import { useAuth } from "../context/AuthContext";
 
 const Stack = createNativeStackNavigator();
@@ -25,7 +26,7 @@ export default function AppNavigator() {
           <Stack.Screen
             name="Home"
             component={HomeScreen}
-            options={{ title: "Halaman Utama" }}
+            options={{ headerShown: false }}
           />
           <Stack.Screen
             name="ShipmentForm"
@@ -41,6 +42,11 @@ export default function AppNavigator() {
             name="ShipmentDetail"
             component={ShipmentDetailScreen}
             options={{ title: "Detail Pengiriman" }}
+          />
+          <Stack.Screen
+            name="Profile"
+            component={ProfileScreen}
+            options={{ title: "Profil" }}
           />
         </>
       )}
