@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@expo/metro-runtime": "~6.1.2",
-    "expo-image-picker": "~16.0.3",
+    "expo-image-picker": "~17.0.10",
     "@react-navigation/bottom-tabs": "^6.5.20",
     "@react-navigation/native": "^6.1.9",
     "@react-navigation/native-stack": "^6.9.17",

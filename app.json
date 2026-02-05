@@ -4,13 +4,17 @@
     "slug": "app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#F2F3F5"
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "f7226e62-1a5f-4565-80d0-097151dfc741"
+      }
     },
-    "assetBundlePatterns": ["**/*"]
+    "android": {
+      "package": "com.kikipratama.app"
+    }
   }
 }

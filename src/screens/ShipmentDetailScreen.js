@@ -52,28 +52,107 @@ export default function ShipmentDetailScreen({ route }) {
   const onPrint = async () => {
     if (!shipment) return;
     try {
+      const createdDate = shipment.created_at
+        ? new Date(shipment.created_at).toLocaleString("id-ID")
+        : "-";
       const html = `
         <html>
-          <body style="font-family: Arial, sans-serif; padding: 16px;">
-            <h2>Resi Pengiriman</h2>
-            <p><strong>No Resi:</strong> ${shipment.resi_number}</p>
-            <p><strong>Status:</strong> ${shipment.status}</p>
-            <hr/>
-            <h3>Pengirim</h3>
-            <p>${shipment.sender_name}</p>
-            <p>${shipment.sender_phone}</p>
-            <p>${shipment.sender_address}</p>
-            <h3>Penerima</h3>
-            <p>${shipment.receiver_name}</p>
-            <p>${shipment.receiver_phone}</p>
-            <p>${shipment.receiver_address}</p>
-            <h3>Detail Paket</h3>
-            <p><strong>Asal:</strong> ${shipment.origin}</p>
-            <p><strong>Tujuan:</strong> ${shipment.destination}</p>
-            <p><strong>Berat:</strong> ${shipment.weight_kg} kg</p>
-            <p><strong>Isi:</strong> ${shipment.content}</p>
-            <p><strong>Layanan:</strong> ${shipment.service}</p>
-            <p><strong>Catatan:</strong> ${shipment.notes || "-"}</p>
+          <head>
+            <style>
+              * { box-sizing: border-box; }
+              body { font-family: Arial, sans-serif; padding: 16px; color: #111827; }
+              .sheet { border: 1px solid #111827; padding: 12px; }
+              .row { display: flex; gap: 12px; }
+              .logo {
+                width: 64px; height: 64px; border-radius: 32px;
+                border: 2px solid #0E9F4B; display: flex; align-items: center;
+                justify-content: center; font-weight: 700; color: #0E9F4B;
+              }
+              .barcode {
+                width: 220px; height: 60px; border: 1px solid #111827;
+                background: repeating-linear-gradient(
+                  90deg,
+                  #111827 0px,
+                  #111827 2px,
+                  #ffffff 2px,
+                  #ffffff 4px
+                );
+              }
+              .barcode-text { font-size: 12px; text-align: center; margin-top: 4px; }
+              table { width: 100%; border-collapse: collapse; font-size: 12px; }
+              td, th { border: 1px solid #111827; padding: 6px; vertical-align: top; }
+              .label { color: #6B7280; font-size: 11px; text-transform: uppercase; letter-spacing: .5px; }
+              .title { font-weight: 700; font-size: 14px; }
+              .section-title { font-weight: 700; background: #F3F4F6; }
+            </style>
+          </head>
+          <body>
+            <div class="sheet">
+              <div class="row" style="justify-content: space-between; margin-bottom: 10px;">
+                <div class="row">
+                  <div class="logo">JNE</div>
+                  <div>
+                    <div class="title">JNE Clone</div>
+                    <div class="label">CONSIGNMENT NOTE</div>
+                    <div style="font-size: 11px;">Tanggal: ${createdDate}</div>
+                  </div>
+                </div>
+                <div>
+                  <div class="barcode"></div>
+                  <div class="barcode-text">${shipment.resi_number}</div>
+                </div>
+              </div>
+
+              <table>
+                <tr>
+                  <th class="section-title" colspan="2">Data Pengirim</th>
+                  <th class="section-title" colspan="2">Data Penerima</th>
+                </tr>
+                <tr>
+                  <td class="label">Nama</td>
+                  <td>${shipment.sender_name}</td>
+                  <td class="label">Nama</td>
+                  <td>${shipment.receiver_name}</td>
+                </tr>
+                <tr>
+                  <td class="label">Telepon</td>
+                  <td>${shipment.sender_phone}</td>
+                  <td class="label">Telepon</td>
+                  <td>${shipment.receiver_phone}</td>
+                </tr>
+                <tr>
+                  <td class="label">Alamat</td>
+                  <td>${shipment.sender_address}</td>
+                  <td class="label">Alamat</td>
+                  <td>${shipment.receiver_address}</td>
+                </tr>
+                <tr>
+                  <th class="section-title" colspan="4">Detail Paket</th>
+                </tr>
+                <tr>
+                  <td class="label">Asal</td>
+                  <td>${shipment.origin}</td>
+                  <td class="label">Tujuan</td>
+                  <td>${shipment.destination}</td>
+                </tr>
+                <tr>
+                  <td class="label">Berat</td>
+                  <td>${shipment.weight_kg} kg</td>
+                  <td class="label">Layanan</td>
+                  <td>${shipment.service}</td>
+                </tr>
+                <tr>
+                  <td class="label">Isi Paket</td>
+                  <td>${shipment.content}</td>
+                  <td class="label">Status</td>
+                  <td>${shipment.status}</td>
+                </tr>
+                <tr>
+                  <td class="label">Catatan</td>
+                  <td colspan="3">${shipment.notes || "-"}</td>
+                </tr>
+              </table>
+            </div>
           </body>
         </html>
       `;

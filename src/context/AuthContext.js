@@ -14,6 +14,9 @@ export function AuthProvider({ children }) {
         setUser(nextUser);
         setToken(nextToken);
       },
+      updateUser: (partial) => {
+        setUser((prev) => (prev ? { ...prev, ...partial } : prev));
+      },
       signOut: () => {
         setUser(null);
         setToken(null);

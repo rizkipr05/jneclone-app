@@ -6,10 +6,11 @@ import {
   TextInput,
   Pressable,
   FlatList,
-  Image
+  Image,
+  Alert
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import { listShipments } from "../services/api";
+import { deleteAllShipments, listShipments } from "../services/api";
 import { useAuth } from "../context/AuthContext";
 import { COLORS, SPACING, RADIUS } from "../styles/theme";
 
@@ -42,7 +43,35 @@ export default function ShipmentHistoryScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Riwayat Pengiriman</Text>
+      <View style={styles.headerRow}>
+        <Text style={styles.title}>Riwayat Pengiriman</Text>
+        <Pressable
+          onPress={() =>
+            Alert.alert(
+              "Hapus Semua",
+              "Yakin ingin menghapus semua data pengiriman?",
+              [
+                { text: "Batal", style: "cancel" },
+                {
+                  text: "Ya",
+                  style: "destructive",
+                  onPress: async () => {
+                    try {
+                      await deleteAllShipments(token);
+                      load();
+                    } catch (err) {
+                      Alert.alert("Gagal", err.message);
+                    }
+                  }
+                }
+              ]
+            )
+          }
+          style={styles.clearButton}
+        >
+          <Text style={styles.clearText}>Hapus Semua</Text>
+        </Pressable>
+      </View>
       <View style={styles.searchRow}>
         <TextInput
           value={search}
@@ -116,6 +145,24 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: COLORS.text,
     marginBottom: SPACING.m
+  },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center"
+  },
+  clearButton: {
+    paddingHorizontal: SPACING.m,
+    paddingVertical: 8,
+    borderRadius: RADIUS.m,
+    borderWidth: 1,
+    borderColor: "#F1B6B6",
+    backgroundColor: "#FFF5F5"
+  },
+  clearText: {
+    color: COLORS.danger,
+    fontWeight: "600",
+    fontSize: 12
   },
   searchRow: {
     flexDirection: "row",

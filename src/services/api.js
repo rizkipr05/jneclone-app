@@ -71,6 +71,10 @@ export function listShipments(params, token) {
   return request(`/shipments${query}`, { token });
 }
 
+export function deleteAllShipments(token) {
+  return request("/shipments", { method: "DELETE", token });
+}
+
 export function getShipmentById(id, token) {
   return request(`/shipments/${id}`, { token });
 }

@@ -30,7 +30,7 @@ const initialState = {
   notes: ""
 };
 
-export default function ShipmentFormScreen() {
+export default function ShipmentFormScreen({ navigation }) {
   const { token } = useAuth();
   const [form, setForm] = useState(initialState);
   const [loading, setLoading] = useState(false);
@@ -102,117 +102,135 @@ export default function ShipmentFormScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.title}>Input Data Pengiriman</Text>
-
-        <Text style={styles.sectionTitle}>Foto Pengiriman</Text>
-        <Pressable
-          onPress={async () => {
-            const result = await ImagePicker.launchImageLibraryAsync({
-              mediaTypes: ImagePicker.MediaTypeOptions.Images,
-              allowsEditing: true,
-              quality: 0.7,
-              base64: true
-            });
-            if (!result.canceled) {
-              setImageBase64(result.assets[0]?.base64 || "");
-            }
-          }}
-          style={styles.imagePicker}
-        >
-          <Text style={styles.imagePickerText}>
-            {imageBase64 ? "Ganti Foto" : "Pilih Foto"}
+        <View style={styles.header}>
+          <Text style={styles.title}>Input Data Pengiriman</Text>
+          <Text style={styles.subtitle}>
+            Lengkapi data pengirim, penerima, dan detail paket.
           </Text>
-        </Pressable>
-        {imageBase64 ? (
-          <Image
-            source={{ uri: `data:image/jpeg;base64,${imageBase64}` }}
-            style={styles.imagePreview}
+        </View>
+
+        <View style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>Foto Pengiriman</Text>
+          <Pressable
+            onPress={async () => {
+              const result = await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ["images"],
+              allowsEditing: true,
+              quality: 0.5,
+              base64: true
+              });
+              if (!result.canceled) {
+                setImageBase64(result.assets[0]?.base64 || "");
+              }
+            }}
+            style={styles.imagePicker}
+          >
+            <Text style={styles.imagePickerText}>
+              {imageBase64 ? "Ganti Foto" : "Pilih Foto"}
+            </Text>
+          </Pressable>
+          <Text style={styles.imageHint}>
+            {imageBase64
+              ? `Foto siap (${Math.ceil(imageBase64.length / 1024)} KB)`
+              : "Belum ada foto"}
+          </Text>
+          {imageBase64 ? (
+            <Image
+              source={{ uri: `data:image/jpeg;base64,${imageBase64}` }}
+              style={styles.imagePreview}
+            />
+          ) : null}
+        </View>
+
+        <View style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>Pengirim</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Nama pengirim"
+            value={form.sender_name}
+            onChangeText={(v) => onChange("sender_name", v)}
           />
-        ) : null}
+          <TextInput
+            style={styles.input}
+            placeholder="No. HP pengirim"
+            keyboardType="phone-pad"
+            value={form.sender_phone}
+            onChangeText={(v) => onChange("sender_phone", v)}
+          />
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            placeholder="Alamat pengirim"
+            multiline
+            value={form.sender_address}
+            onChangeText={(v) => onChange("sender_address", v)}
+          />
+        </View>
 
-      <Text style={styles.sectionTitle}>Pengirim</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Nama pengirim"
-        value={form.sender_name}
-        onChangeText={(v) => onChange("sender_name", v)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="No. HP pengirim"
-        keyboardType="phone-pad"
-        value={form.sender_phone}
-        onChangeText={(v) => onChange("sender_phone", v)}
-      />
-      <TextInput
-        style={[styles.input, styles.textArea]}
-        placeholder="Alamat pengirim"
-        multiline
-        value={form.sender_address}
-        onChangeText={(v) => onChange("sender_address", v)}
-      />
+        <View style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>Penerima</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Nama penerima"
+            value={form.receiver_name}
+            onChangeText={(v) => onChange("receiver_name", v)}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="No. HP penerima"
+            keyboardType="phone-pad"
+            value={form.receiver_phone}
+            onChangeText={(v) => onChange("receiver_phone", v)}
+          />
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            placeholder="Alamat penerima"
+            multiline
+            value={form.receiver_address}
+            onChangeText={(v) => onChange("receiver_address", v)}
+          />
+        </View>
 
-      <Text style={styles.sectionTitle}>Penerima</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Nama penerima"
-        value={form.receiver_name}
-        onChangeText={(v) => onChange("receiver_name", v)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="No. HP penerima"
-        keyboardType="phone-pad"
-        value={form.receiver_phone}
-        onChangeText={(v) => onChange("receiver_phone", v)}
-      />
-      <TextInput
-        style={[styles.input, styles.textArea]}
-        placeholder="Alamat penerima"
-        multiline
-        value={form.receiver_address}
-        onChangeText={(v) => onChange("receiver_address", v)}
-      />
-
-      <Text style={styles.sectionTitle}>Detail Paket</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Asal (kota/agen)"
-        value={form.origin}
-        onChangeText={(v) => onChange("origin", v)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Tujuan (kota/agen)"
-        value={form.destination}
-        onChangeText={(v) => onChange("destination", v)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Berat (kg)"
-        keyboardType="decimal-pad"
-        value={form.weight_kg}
-        onChangeText={(v) => onChange("weight_kg", v)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Isi paket"
-        value={form.content}
-        onChangeText={(v) => onChange("content", v)}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Layanan (REG/YES/OKE)"
-        value={form.service}
-        onChangeText={(v) => onChange("service", v)}
-      />
-      <TextInput
-        style={[styles.input, styles.textArea]}
-        placeholder="Catatan (opsional)"
-        multiline
-        value={form.notes}
-        onChangeText={(v) => onChange("notes", v)}
-      />
+        <View style={styles.sectionCard}>
+          <Text style={styles.sectionTitle}>Detail Paket</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Asal (kota/agen)"
+            value={form.origin}
+            onChangeText={(v) => onChange("origin", v)}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Tujuan (kota/agen)"
+            value={form.destination}
+            onChangeText={(v) => onChange("destination", v)}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Berat (kg)"
+            keyboardType="decimal-pad"
+            value={form.weight_kg}
+            onChangeText={(v) => onChange("weight_kg", v)}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Isi paket"
+            value={form.content}
+            onChangeText={(v) => onChange("content", v)}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Layanan (REG/YES/OKE)"
+            value={form.service}
+            onChangeText={(v) => onChange("service", v)}
+          />
+          <TextInput
+            style={[styles.input, styles.textArea]}
+            placeholder="Catatan (opsional)"
+            multiline
+            value={form.notes}
+            onChangeText={(v) => onChange("notes", v)}
+          />
+        </View>
 
         <PrimaryButton
           title={loading ? "Menyimpan..." : "Simpan & Generate Resi"}
@@ -234,16 +252,30 @@ const styles = StyleSheet.create({
     padding: SPACING.l,
     paddingBottom: 140
   },
+  header: {
+    marginBottom: SPACING.m
+  },
   title: {
     fontSize: 24,
     fontWeight: "700",
     color: COLORS.text,
     marginBottom: SPACING.m
   },
+  subtitle: {
+    color: COLORS.muted,
+    marginTop: -SPACING.s
+  },
+  sectionCard: {
+    backgroundColor: COLORS.white,
+    padding: SPACING.l,
+    borderRadius: RADIUS.l,
+    borderWidth: 1,
+    borderColor: "#EEF1F6",
+    marginBottom: SPACING.m
+  },
   sectionTitle: {
     fontWeight: "700",
     color: COLORS.text,
-    marginTop: SPACING.m,
     marginBottom: SPACING.s
   },
   input: {
@@ -275,6 +307,11 @@ const styles = StyleSheet.create({
   imagePickerText: {
     color: COLORS.text,
     fontWeight: "600"
+  },
+  imageHint: {
+    color: COLORS.muted,
+    fontSize: 12,
+    marginTop: 6
   },
   imagePreview: {
     width: "100%",

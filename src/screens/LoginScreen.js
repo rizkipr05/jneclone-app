@@ -47,6 +47,7 @@ export default function LoginScreen({ navigation }) {
           onChangeText={setUsername}
           placeholder="Masukkan username"
           autoCapitalize="none"
+          placeholderTextColor={COLORS.muted}
           style={styles.input}
         />
 
@@ -56,6 +57,7 @@ export default function LoginScreen({ navigation }) {
           onChangeText={setPassword}
           placeholder="Masukkan password"
           secureTextEntry
+          placeholderTextColor={COLORS.muted}
           style={styles.input}
         />
 

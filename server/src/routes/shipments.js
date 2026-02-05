@@ -43,6 +43,10 @@ router.post("/", async (req, res) => {
   }
 
   try {
+    const imageLen = body.image_base64 ? body.image_base64.length : 0;
+    if (imageLen > 0) {
+      console.log(`Image base64 length: ${imageLen}`);
+    }
     const [result] = await pool.query(
       `INSERT INTO shipments
       (sender_name, sender_phone, sender_address, receiver_name, receiver_phone, receiver_address,
@@ -116,6 +120,17 @@ router.get("/", async (req, res) => {
     return res.json({ items: rows });
   } catch (err) {
     console.error("List shipments error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+});
+
+router.delete("/", async (req, res) => {
+  try {
+    await pool.query("DELETE FROM shipment_status_history");
+    await pool.query("DELETE FROM shipments");
+    return res.json({ message: "Semua data pengiriman dihapus." });
+  } catch (err) {
+    console.error("Delete all shipments error:", err);
     return res.status(500).json({ message: "Server error" });
   }
 });
